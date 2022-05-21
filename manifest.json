@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Youtube Ad Skipper",
+  "description": "Skip and close YouTube ads automatically.",
+  "version": "0.0.1",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["main.js"]
+    }
+  ]
+}
