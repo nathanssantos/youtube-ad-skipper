@@ -6,12 +6,24 @@ import { dismissAntiAdblock } from "./handlers/anti-adblock";
 
 const FALLBACK_INTERVAL_MS = 5000;
 
+const getVideo = (): HTMLVideoElement | null =>
+  document.querySelector<HTMLVideoElement>("video.html5-main-video") ??
+  document.querySelector<HTMLVideoElement>("video");
+
+const ensureVideoPlaying = (): void => {
+  const video = getVideo();
+  if (video?.paused) {
+    video.play().catch(() => {});
+  }
+};
+
 const runAllHandlers = (): void => {
   tryClickSkipButton();
   handleUnskippableAd();
   closeOverlayAds();
   removeSidebarAds();
   dismissAntiAdblock();
+  ensureVideoPlaying();
 };
 
 let observer: MutationObserver | null = null;
