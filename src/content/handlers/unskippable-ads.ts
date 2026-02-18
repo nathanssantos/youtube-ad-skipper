@@ -9,6 +9,7 @@ interface SavedVideoState {
 
 let savedState: SavedVideoState | null = null;
 let isHandlingUnskippable = false;
+let skipInterval: ReturnType<typeof setInterval> | null = null;
 
 const getVideo = (): HTMLVideoElement | null =>
   document.querySelector<HTMLVideoElement>("video.html5-main-video") ??
@@ -36,12 +37,48 @@ const restoreVideoState = (video: HTMLVideoElement): void => {
   savedState = null;
 };
 
+const clearSkipInterval = (): void => {
+  if (skipInterval !== null) {
+    clearInterval(skipInterval);
+    skipInterval = null;
+  }
+};
+
+const trySkipToEnd = (video: HTMLVideoElement): boolean => {
+  const duration = video.duration;
+  if (!duration || !isFinite(duration)) return false;
+
+  try {
+    video.currentTime = duration;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const startSkipLoop = (video: HTMLVideoElement): void => {
+  if (skipInterval !== null) return;
+
+  if (trySkipToEnd(video)) return;
+
+  skipInterval = setInterval(() => {
+    if (!isAdPlaying()) {
+      clearSkipInterval();
+      return;
+    }
+    if (trySkipToEnd(video)) {
+      clearSkipInterval();
+    }
+  }, 100);
+};
+
 export const handleUnskippableAd = (): void => {
   const video = getVideo();
   if (!video) return;
 
   if (!isAdPlaying()) {
     if (isHandlingUnskippable) {
+      clearSkipInterval();
       restoreVideoState(video);
       isHandlingUnskippable = false;
     }
@@ -55,10 +92,5 @@ export const handleUnskippableAd = (): void => {
   }
 
   video.muted = true;
-
-  try {
-    video.currentTime = video.duration || video.currentTime;
-  } catch {
-    // Some ads prevent seeking - mute is still active
-  }
+  startSkipLoop(video);
 };
