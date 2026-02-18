@@ -1,16 +1,24 @@
 {
   "name": "youtube-ad-skipper",
-  "version": "1.0.0",
-  "description": "Simple Google Chrome extension that skips YouTube ads automatically.",
-  "main": "main.js",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Chrome extension that automatically skips, mutes, and removes YouTube ads.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node esbuild.config.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "generate-icons": "npx tsx scripts/generate-icons.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nathanssantos/youtube-ad-skipper.git"
   },
-  "keywords": [],
+  "keywords": ["youtube", "ad-blocker", "chrome-extension", "ad-skipper"],
   "author": {
     "name": "Nathan Silva Santos",
     "email": "nathansilvasantos@gmail.com"
@@ -19,5 +27,17 @@
   "bugs": {
     "url": "https://github.com/nathanssantos/youtube-ad-skipper/issues"
   },
-  "homepage": "https://github.com/nathanssantos/youtube-ad-skipper#readme"
+  "homepage": "https://github.com/nathanssantos/youtube-ad-skipper#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "chrome-types": "^0.1.327",
+    "esbuild": "^0.24.2",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.22.0",
+    "vitest": "^3.0.4",
+    "jsdom": "^25.0.1"
+  }
 }

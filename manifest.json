@@ -1,12 +1,48 @@
 {
   "manifest_version": 3,
-  "name": "Youtube Ad Skipper",
-  "description": "Skip and close YouTube ads automatically.",
-  "version": "0.0.1",
+  "name": "YouTube Ad Skipper",
+  "description": "Automatically skip, mute, and remove YouTube ads. Handles skippable, unskippable, overlay, sidebar, and anti-adblock popups.",
+  "version": "2.0.0",
+  "permissions": ["storage", "activeTab", "tabs"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://m.youtube.com/*"
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "dist/service-worker.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
-      "js": ["main.js"]
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
+      ],
+      "js": ["dist/content.js"],
+      "run_at": "document_idle"
     }
-  ]
+  ],
+  "commands": {
+    "toggle-extension": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Toggle YouTube Ad Skipper on/off"
+    }
+  }
 }

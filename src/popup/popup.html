@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>YouTube Ad Skipper</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>YouTube Ad Skipper</h1>
+      </div>
+
+      <div class="toggle-row">
+        <span id="status-label" class="status-label">Active</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-value" id="ads-skipped">0</span>
+          <span class="stat-desc">Ads skipped</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="time-saved">0s</span>
+          <span class="stat-desc">Time saved</span>
+        </div>
+      </div>
+
+      <div class="shortcut">
+        <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd> to toggle
+      </div>
+    </div>
+
+    <script src="../../dist/popup.js"></script>
+  </body>
+</html>
