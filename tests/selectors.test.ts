@@ -2,25 +2,21 @@ import { describe, it, expect } from "vitest";
 import { SELECTORS } from "../src/content/selectors";
 
 describe("SELECTORS", () => {
-  it("should have skip button selectors", () => {
-    expect(SELECTORS.skipButtons.length).toBeGreaterThan(0);
-    expect(SELECTORS.skipButtons).toContain(".ytp-ad-skip-button");
+  it("should target the player and video elements", () => {
+    expect(SELECTORS.player).toBe("#movie_player");
+    expect(SELECTORS.video).toBe("video.html5-main-video");
+    expect(SELECTORS.adShowingClass).toBe("ad-showing");
+  });
+
+  it("should list skip button selectors, current one first", () => {
+    expect(SELECTORS.skipButtons[0]).toBe(".ytp-skip-ad-button");
     expect(SELECTORS.skipButtons).toContain(".ytp-ad-skip-button-modern");
+    expect(SELECTORS.skipButtons).toContain(".ytp-ad-skip-button");
   });
 
   it("should have overlay close selectors", () => {
     expect(SELECTORS.overlayClose.length).toBeGreaterThan(0);
     expect(SELECTORS.overlayClose).toContain(".ytp-ad-overlay-close-button");
-  });
-
-  it("should have overlay ad selectors", () => {
-    expect(SELECTORS.overlayAds.length).toBeGreaterThan(0);
-    expect(SELECTORS.overlayAds).toContain(".ytp-ad-player-overlay");
-  });
-
-  it("should have ad playing indicator selectors", () => {
-    expect(SELECTORS.adPlaying).toContain(".ad-showing");
-    expect(SELECTORS.adPlaying).toContain(".ad-interrupting");
   });
 
   it("should have sidebar ad selectors", () => {
@@ -29,27 +25,27 @@ describe("SELECTORS", () => {
     expect(SELECTORS.sidebarAds).toContain("#masthead-ad");
   });
 
+  it("should NOT remove the in-player ad container", () => {
+    // .video-ads is the element the ad video renders into — removing it
+    // breaks the ad->content hand-off (black screen).
+    const all = [...SELECTORS.skipButtons, ...SELECTORS.overlayClose, ...SELECTORS.sidebarAds];
+    expect(all).not.toContain(".video-ads");
+  });
+
   it("should have anti-adblock selectors", () => {
+    expect(SELECTORS.antiAdblock.enforcementMessage).toBe("ytd-enforcement-message-view-model");
     expect(SELECTORS.antiAdblock.dismissButton).toBe("#dismiss-button");
     expect(SELECTORS.antiAdblock.backdrop).toBe("tp-yt-iron-overlay-backdrop");
-    expect(SELECTORS.antiAdblock.enforcementMessage).toBe("ytd-enforcement-message-view-model");
+    expect(SELECTORS.antiAdblock.popupContainer).toBe("ytd-popup-container");
   });
 
-  it("should have pause screen ad selectors", () => {
-    expect(SELECTORS.pauseScreenAds.length).toBeGreaterThan(0);
-    expect(SELECTORS.pauseScreenAds).toContain(".ytp-ad-action-interstitial");
-  });
-
-  it("should have all selectors as strings", () => {
-    const allArraySelectors = [
+  it("should have every array selector as a non-empty string", () => {
+    const all = [
       ...SELECTORS.skipButtons,
       ...SELECTORS.overlayClose,
-      ...SELECTORS.overlayAds,
-      ...SELECTORS.adPlaying,
       ...SELECTORS.sidebarAds,
-      ...SELECTORS.pauseScreenAds,
     ];
-    for (const selector of allArraySelectors) {
+    for (const selector of all) {
       expect(typeof selector).toBe("string");
       expect(selector.length).toBeGreaterThan(0);
     }

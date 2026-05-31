@@ -1,26 +1,19 @@
-import { startObserving, stopObserving } from "./observers";
+import { start, stop } from "./ad-skipper";
 
-const init = (): void => {
-  chrome.storage.local.get(["enabled"], (result) => {
-    const enabled = result.enabled ?? true;
-    if (enabled) startObserving();
-  });
+const apply = (enabled: boolean): void => {
+  if (enabled) {
+    start();
+  } else {
+    stop();
+  }
 };
 
-chrome.runtime.onMessage.addListener((message: { action: string }) => {
-  if (message.action === "enable") startObserving();
-  if (message.action === "disable") stopObserving();
-  return undefined;
+chrome.storage.local.get(["enabled"], (result) => {
+  apply(result.enabled ?? true);
 });
 
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.enabled) {
-    if (changes.enabled.newValue) {
-      startObserving();
-    } else {
-      stopObserving();
-    }
+    apply(Boolean(changes.enabled.newValue));
   }
 });
-
-init();

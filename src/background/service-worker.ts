@@ -13,18 +13,12 @@ const updateBadge = (enabled: boolean): void => {
 
 const toggleEnabled = async (): Promise<void> => {
   const result = await chrome.storage.local.get(["enabled"]);
-  const current = result.enabled ?? true;
-  const next = !current;
+  const next = !(result.enabled ?? true);
 
+  // Writing storage is enough: content scripts and the popup both react via
+  // chrome.storage.onChanged, so every YouTube tab updates on its own.
   await chrome.storage.local.set({ enabled: next });
   updateBadge(next);
-
-  const tabs = await chrome.tabs.query({ url: ["*://www.youtube.com/*", "*://m.youtube.com/*"] });
-  for (const tab of tabs) {
-    if (tab.id) {
-      chrome.tabs.sendMessage(tab.id, { action: next ? "enable" : "disable" }).catch(() => {});
-    }
-  }
 };
 
 chrome.commands.onCommand.addListener((command) => {

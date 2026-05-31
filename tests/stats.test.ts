@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { chromeMock } from "./setup";
-import { incrementStat } from "../src/content/stats";
+import { recordSkip } from "../src/content/stats";
 
-describe("incrementStat", () => {
+describe("recordSkip", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     chromeMock.storage._reset();
   });
 
-  it("should initialize stats and increment adsSkipped", () => {
+  it("initializes stats and records the first skip", () => {
     chromeMock.storage.local.get.mockImplementation(
       (_keys: string[], callback?: (result: Record<string, unknown>) => void) => {
         if (callback) callback({});
@@ -16,15 +16,15 @@ describe("incrementStat", () => {
       },
     );
 
-    incrementStat("adsSkipped");
+    recordSkip(30);
 
     expect(chromeMock.storage.local.get).toHaveBeenCalledWith(["stats"], expect.any(Function));
     expect(chromeMock.storage.local.set).toHaveBeenCalledWith({
-      stats: { adsSkipped: 1, timeSaved: 0 },
+      stats: { adsSkipped: 1, timeSaved: 30 },
     });
   });
 
-  it("should increment existing stats", () => {
+  it("increments both counters atomically in one write", () => {
     const existingStats = { adsSkipped: 5, timeSaved: 120 };
     chromeMock.storage.local.get.mockImplementation(
       (_keys: string[], callback?: (result: Record<string, unknown>) => void) => {
@@ -33,26 +33,25 @@ describe("incrementStat", () => {
       },
     );
 
-    incrementStat("adsSkipped");
+    recordSkip(15);
 
     expect(chromeMock.storage.local.set).toHaveBeenCalledWith({
-      stats: { adsSkipped: 6, timeSaved: 120 },
+      stats: { adsSkipped: 6, timeSaved: 135 },
     });
   });
 
-  it("should increment by custom value", () => {
-    const existingStats = { adsSkipped: 0, timeSaved: 10 };
+  it("counts the skip even when no time was saved", () => {
     chromeMock.storage.local.get.mockImplementation(
       (_keys: string[], callback?: (result: Record<string, unknown>) => void) => {
-        if (callback) callback({ stats: existingStats });
-        return Promise.resolve({ stats: existingStats });
+        if (callback) callback({ stats: { adsSkipped: 2, timeSaved: 10 } });
+        return Promise.resolve({});
       },
     );
 
-    incrementStat("timeSaved", 30);
+    recordSkip(0);
 
     expect(chromeMock.storage.local.set).toHaveBeenCalledWith({
-      stats: { adsSkipped: 0, timeSaved: 40 },
+      stats: { adsSkipped: 3, timeSaved: 10 },
     });
   });
 });
