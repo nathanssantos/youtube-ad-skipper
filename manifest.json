@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouTube Ad Skipper",
   "description": "Automatically skip, mute, and remove YouTube ads. Handles skippable, unskippable, overlay, sidebar, and anti-adblock popups.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "permissions": ["storage"],
   "host_permissions": ["https://www.youtube.com/*"],
   "action": {
