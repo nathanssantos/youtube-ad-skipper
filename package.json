@@ -1,6 +1,6 @@
 {
   "name": "youtube-ad-skipper",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "type": "module",
   "description": "Chrome extension that automatically skips, mutes, and removes YouTube ads.",
   "scripts": {

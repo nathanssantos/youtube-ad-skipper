@@ -9,10 +9,19 @@ let stop: AdSkipper["stop"];
 
 // jsdom does not implement media playback, so we build a <video> whose
 // duration/currentTime are plain, assertable, writable values.
-const makeVideo = (duration: number, currentTime = 0): HTMLVideoElement => {
+const makeVideo = (
+  duration: number,
+  currentTime = 0,
+  bufferedEnd = duration,
+): HTMLVideoElement => {
   const video = document.createElement("video");
   video.className = "video-stream html5-main-video";
   Object.defineProperty(video, "duration", { value: duration, configurable: true });
+  // Minimal TimeRanges stub so fastForwardAd can read how much is buffered.
+  Object.defineProperty(video, "buffered", {
+    value: { length: bufferedEnd > 0 ? 1 : 0, start: () => 0, end: () => bufferedEnd },
+    configurable: true,
+  });
   let ct = currentTime;
   Object.defineProperty(video, "currentTime", {
     get: () => ct,
@@ -108,6 +117,30 @@ describe("ad-skipper", () => {
       handleAds();
 
       expect(video.currentTime).toBeLessThan(30);
+    });
+
+    it("never seeks past the buffered range on a long ad (avoids the stall/freeze)", () => {
+      // 190s ad, only 52s buffered: seeking to ~190 would stall the player.
+      const player = makePlayer(true);
+      const video = makeVideo(190, 20, 52);
+      player.appendChild(video);
+      document.body.appendChild(player);
+
+      handleAds();
+
+      expect(video.currentTime).toBeCloseTo(51.9, 5); // bufferedEnd - 0.1
+      expect(video.currentTime).toBeLessThan(52); // never jumps into unbuffered territory
+    });
+
+    it("does nothing until the ad has buffered anything", () => {
+      const player = makePlayer(true);
+      const video = makeVideo(30, 0, 0); // nothing buffered yet
+      player.appendChild(video);
+      document.body.appendChild(player);
+
+      handleAds();
+
+      expect(video.currentTime).toBe(0);
     });
 
     it("clicks the current skip button when present", () => {

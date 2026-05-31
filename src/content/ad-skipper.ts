@@ -31,15 +31,25 @@ const clickSkipButton = (): void => {
   }
 };
 
-// Jump (almost) to the end of the ad. Returns the seconds skipped, or 0 if it
-// did nothing (duration not known yet, or we already jumped this ad).
+// Jump toward the end of the ad. Returns the seconds skipped, or 0 if there is
+// nothing to skip to yet.
+//
+// Critically, we never seek past the buffered range. Seeking to an unbuffered
+// position (e.g. the exact end of a long, half-loaded ad) makes the player
+// stall fetching that segment — readyState drops to 0 and the ad freezes on a
+// black/skip frame for seconds. So we cap the target at what's already loaded
+// and let the next ticks ride the buffer forward as the ad downloads.
 const fastForwardAd = (video: HTMLVideoElement): number => {
-  const { duration, currentTime } = video;
+  const { duration, currentTime, buffered } = video;
   if (!Number.isFinite(duration) || duration <= 0) return 0;
-  if (currentTime >= duration - 1) return 0;
+
+  const bufferedEnd = buffered.length ? buffered.end(buffered.length - 1) : 0;
+  const target = Math.min(duration, bufferedEnd) - SEEK_END_MARGIN_S;
+  if (target <= currentTime + SEEK_END_MARGIN_S) return 0;
+
   try {
-    video.currentTime = duration - SEEK_END_MARGIN_S;
-    return duration - currentTime;
+    video.currentTime = target;
+    return target - currentTime;
   } catch {
     return 0;
   }
