@@ -86,19 +86,24 @@ const closeOverlayBanners = (): void => {
 };
 
 const dismissAntiAdblock = (): void => {
-  const { enforcementMessage, dismissButton, popupContainer, backdrop } =
-    SELECTORS.antiAdblock;
+  const { enforcementMessage, dismissButton, dialog, backdrop } = SELECTORS.antiAdblock;
 
-  // Only touch YouTube's popup primitives when the adblock-detection message is
-  // actually present — otherwise we'd break every normal menu/dialog backdrop.
+  // Only touch anything when the adblock-detection message is actually present.
   const enforcement = document.querySelector<HTMLElement>(enforcementMessage);
   if (!enforcement) return;
 
   document.querySelector<HTMLElement>(dismissButton)?.click();
-  (enforcement.closest(popupContainer) ?? enforcement).remove();
+  // Remove ONLY the adblock dialog — never enforcement.closest("ytd-popup-container"),
+  // because that shared container is where every menu/dialog (incl. the 3-dot
+  // menu) renders. Deleting it makes those stop opening until you navigate away.
+  (enforcement.closest(dialog) ?? enforcement).remove();
   document.querySelector<HTMLElement>(backdrop)?.remove();
   document.documentElement.style.removeProperty("overflow");
   document.body?.style.removeProperty("overflow");
+
+  // The popup pauses playback; the user didn't, so resume it.
+  const video = getVideo();
+  if (video?.paused) video.play().catch(() => {});
 };
 
 let lastCleanup = 0;

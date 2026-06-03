@@ -31,7 +31,9 @@ export const SELECTORS = {
   antiAdblock: {
     enforcementMessage: "ytd-enforcement-message-view-model",
     dismissButton: "#dismiss-button",
-    popupContainer: "ytd-popup-container",
+    // The adblock message lives in its own dialog. We remove THIS, never the
+    // shared ytd-popup-container that every menu/dialog renders into.
+    dialog: "tp-yt-paper-dialog",
     backdrop: "tp-yt-iron-overlay-backdrop",
   },
 } as const;

@@ -36,7 +36,11 @@ describe("SELECTORS", () => {
     expect(SELECTORS.antiAdblock.enforcementMessage).toBe("ytd-enforcement-message-view-model");
     expect(SELECTORS.antiAdblock.dismissButton).toBe("#dismiss-button");
     expect(SELECTORS.antiAdblock.backdrop).toBe("tp-yt-iron-overlay-backdrop");
-    expect(SELECTORS.antiAdblock.popupContainer).toBe("ytd-popup-container");
+    expect(SELECTORS.antiAdblock.dialog).toBe("tp-yt-paper-dialog");
+  });
+
+  it("must NOT target the shared ytd-popup-container (it holds every menu)", () => {
+    expect(JSON.stringify(SELECTORS.antiAdblock)).not.toContain("ytd-popup-container");
   });
 
   it("should have every array selector as a non-empty string", () => {

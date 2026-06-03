@@ -333,6 +333,35 @@ describe("ad-skipper", () => {
       expect(document.querySelector("ytd-enforcement-message-view-model")).toBeNull();
       expect(document.querySelector("tp-yt-iron-overlay-backdrop")).toBeNull();
     });
+
+    it("removes the adblock dialog but KEEPS the shared popup container [menu fix]", () => {
+      // The 3-dot menu and every other popup render into ytd-popup-container.
+      // Dismissing the adblock popup must not delete it.
+      const container = document.createElement("ytd-popup-container");
+      const dialog = document.createElement("tp-yt-paper-dialog");
+      const enforcement = document.createElement("ytd-enforcement-message-view-model");
+      dialog.appendChild(enforcement);
+      container.appendChild(dialog);
+      document.body.appendChild(container);
+
+      handleAds();
+
+      expect(document.querySelector("ytd-enforcement-message-view-model")).toBeNull();
+      expect(document.querySelector("tp-yt-paper-dialog")).toBeNull();
+      expect(document.querySelector("ytd-popup-container")).not.toBeNull(); // kept!
+    });
+
+    it("resumes the video the adblock popup had paused", () => {
+      const player = makePlayer(false);
+      const video = makeVideo(200, 30); // paused partway through, behind the popup
+      const enforcement = document.createElement("ytd-enforcement-message-view-model");
+      player.appendChild(video);
+      document.body.append(player, enforcement);
+
+      handleAds();
+
+      expect(video.play).toHaveBeenCalled();
+    });
   });
 
   describe("lifecycle", () => {
