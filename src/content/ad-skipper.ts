@@ -65,6 +65,18 @@ const countSkippedAd = (video: HTMLVideoElement, saved: number): void => {
   recordSkip(saved);
 };
 
+// Skipping an ad with a seek can leave the freshly loaded content paused
+// (its "play" was never resumed because the ad "ended" via a seek). Nudge the
+// just-started content back to playing — ONLY at the very start, and only on
+// the ad->content edge (see handleAds). We never call play() on any other tick,
+// so pausing a video yourself always sticks.
+const resumeStartingContent = (): void => {
+  const video = getVideo();
+  if (video && video.paused && video.currentTime < 1) {
+    video.play().catch(() => {});
+  }
+};
+
 // --- off-player cleanup (throttled) ----------------------------------------
 
 const closeOverlayBanners = (): void => {
@@ -96,6 +108,7 @@ const dismissAntiAdblock = (): void => {
 };
 
 let lastCleanup = 0;
+let wasAdShowing = false;
 
 const runCleanup = (): void => {
   closeOverlayBanners();
@@ -108,7 +121,9 @@ const runCleanup = (): void => {
 export const handleAds = (): void => {
   // Latency-sensitive path, every tick: detect an ad and skip it immediately.
   const player = getPlayer();
-  if (isAdShowing(player)) {
+  const adShowing = isAdShowing(player);
+
+  if (adShowing) {
     const video = getVideo();
     if (video) {
       const saved = fastForwardAd(video);
@@ -116,11 +131,14 @@ export const handleAds = (): void => {
       countSkippedAd(video, saved);
     }
   } else {
-    // No ad → never touch the <video>. This is what lets the user pause,
-    // scrub, change settings, and reach the end of a video without the
-    // extension fighting them.
+    // No ad → never touch the <video>, EXCEPT a one-shot resume right when an
+    // ad just ended (the ad->content edge), so a skipped ad doesn't leave the
+    // next video paused. Outside that edge the video is never played, so the
+    // user can pause, scrub, and let a video end without us fighting them.
+    if (wasAdShowing) resumeStartingContent();
     lastCountedAdDuration = 0;
   }
+  wasAdShowing = adShowing;
 
   // Throttled, latency-insensitive cleanup of off-player ad units.
   const now = Date.now();
@@ -180,4 +198,5 @@ export const stop = (): void => {
     fallbackTimer = null;
   }
   scheduled = false;
+  wasAdShowing = false;
 };

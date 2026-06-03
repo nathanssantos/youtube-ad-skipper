@@ -94,6 +94,73 @@ describe("ad-skipper", () => {
       expect(video.play).not.toHaveBeenCalled();
       expect(video.currentTime).toBe(100); // not rewound, not replayed
     });
+
+    it("never resumes a video the user paused mid-playback [bug #1 guard]", () => {
+      const player = makePlayer(false);
+      const video = makeVideo(100, 42); // paused partway through, no ad
+      player.appendChild(video);
+      document.body.appendChild(player);
+
+      handleAds();
+      handleAds(); // repeated ticks must never fight a manual pause
+
+      expect(video.play).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("resuming content after an ad (without breaking manual pause)", () => {
+    it("nudges just-started content to play once, only on the ad->content edge", () => {
+      const player = makePlayer(true);
+      const video = makeVideo(30, 0);
+      player.appendChild(video);
+      document.body.appendChild(player);
+
+      handleAds(); // ad showing → we are skipping it
+
+      // Ad ends: content is freshly loaded, paused at the very start.
+      player.classList.remove("ad-showing");
+      video.currentTime = 0;
+      handleAds(); // the edge → resume once
+
+      expect(video.play).toHaveBeenCalledTimes(1);
+    });
+
+    it("does NOT resume again after the edge, so a later manual pause sticks", () => {
+      const player = makePlayer(true);
+      const video = makeVideo(30, 0);
+      player.appendChild(video);
+      document.body.appendChild(player);
+
+      handleAds(); // ad
+      player.classList.remove("ad-showing");
+      video.currentTime = 0;
+      handleAds(); // edge → resume (1 call)
+
+      // User watches a bit, then pauses themselves.
+      video.currentTime = 12;
+      video.pause();
+      handleAds();
+      handleAds();
+
+      expect(video.paused).toBe(true); // manual pause respected
+      expect(video.play).toHaveBeenCalledTimes(1); // never resumed again
+    });
+
+    it("does not resume mid-video content even right after an ad", () => {
+      // Edge case: content resumes from a saved position (currentTime well past
+      // the start). We stay hands-off to avoid overriding any intentional state.
+      const player = makePlayer(true);
+      const video = makeVideo(300, 0);
+      player.appendChild(video);
+      document.body.appendChild(player);
+
+      handleAds(); // ad
+      player.classList.remove("ad-showing");
+      video.currentTime = 120; // resumed mid-video
+      handleAds(); // edge, but currentTime is not at the start
+
+      expect(video.play).not.toHaveBeenCalled();
+    });
   });
 
   describe("when an ad is playing", () => {
