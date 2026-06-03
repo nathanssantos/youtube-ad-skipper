@@ -19,16 +19,16 @@ describe("SELECTORS", () => {
     expect(SELECTORS.overlayClose).toContain(".ytp-ad-overlay-close-button");
   });
 
-  it("should have sidebar ad selectors", () => {
-    expect(SELECTORS.sidebarAds.length).toBeGreaterThan(0);
-    expect(SELECTORS.sidebarAds).toContain("ytd-ad-slot-renderer");
-    expect(SELECTORS.sidebarAds).toContain("#masthead-ad");
+  it("should only act on the video, never on feed/sidebar ad units", () => {
+    // We intentionally do not carry feed/sidebar selectors anymore — removing
+    // those shifts the page and breaks YouTube's menus.
+    expect("sidebarAds" in SELECTORS).toBe(false);
   });
 
   it("should NOT remove the in-player ad container", () => {
     // .video-ads is the element the ad video renders into — removing it
     // breaks the ad->content hand-off (black screen).
-    const all = [...SELECTORS.skipButtons, ...SELECTORS.overlayClose, ...SELECTORS.sidebarAds];
+    const all = [...SELECTORS.skipButtons, ...SELECTORS.overlayClose];
     expect(all).not.toContain(".video-ads");
   });
 
@@ -40,11 +40,7 @@ describe("SELECTORS", () => {
   });
 
   it("should have every array selector as a non-empty string", () => {
-    const all = [
-      ...SELECTORS.skipButtons,
-      ...SELECTORS.overlayClose,
-      ...SELECTORS.sidebarAds,
-    ];
+    const all = [...SELECTORS.skipButtons, ...SELECTORS.overlayClose];
     for (const selector of all) {
       expect(typeof selector).toBe("string");
       expect(selector.length).toBeGreaterThan(0);

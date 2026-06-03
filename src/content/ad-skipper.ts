@@ -85,12 +85,6 @@ const closeOverlayBanners = (): void => {
   }
 };
 
-const removeSidebarAds = (): void => {
-  for (const selector of SELECTORS.sidebarAds) {
-    document.querySelectorAll<HTMLElement>(selector).forEach((el) => el.remove());
-  }
-};
-
 const dismissAntiAdblock = (): void => {
   const { enforcementMessage, dismissButton, popupContainer, backdrop } =
     SELECTORS.antiAdblock;
@@ -112,7 +106,6 @@ let wasAdShowing = false;
 
 const runCleanup = (): void => {
   closeOverlayBanners();
-  removeSidebarAds();
   dismissAntiAdblock();
 };
 
@@ -140,7 +133,9 @@ export const handleAds = (): void => {
   }
   wasAdShowing = adShowing;
 
-  // Throttled, latency-insensitive cleanup of off-player ad units.
+  // Throttled, latency-insensitive cleanup of on-video banner ads and the
+  // adblock popup. We deliberately do NOT touch feed/sidebar/thumbnail ads —
+  // removing those shifts the page and breaks YouTube's own menus/dialogs.
   const now = Date.now();
   if (now - lastCleanup >= CLEANUP_INTERVAL_MS) {
     lastCleanup = now;

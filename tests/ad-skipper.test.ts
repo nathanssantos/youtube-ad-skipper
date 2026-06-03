@@ -297,13 +297,15 @@ describe("ad-skipper", () => {
       expect(close.click).toHaveBeenCalled();
     });
 
-    it("removes off-player sidebar/feed ad units", () => {
+    it("leaves feed/sidebar ad units untouched (only video ads matter)", () => {
+      // Removing feed ads shifts the page and breaks YouTube's menus, so we
+      // must NOT touch them.
       const ad = document.createElement("ytd-ad-slot-renderer");
       document.body.appendChild(ad);
 
       handleAds();
 
-      expect(document.querySelector("ytd-ad-slot-renderer")).toBeNull();
+      expect(document.querySelector("ytd-ad-slot-renderer")).not.toBeNull();
     });
 
     it("leaves normal menus alone when there is no adblock popup [bug #2]", () => {

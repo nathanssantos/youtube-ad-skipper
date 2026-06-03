@@ -7,8 +7,8 @@ Chrome extension that automatically skips, mutes, and removes YouTube ads.
 - **Skippable ads** - Clicks the "Skip" button the moment it becomes available (all known variants)
 - **Unskippable ads** - Fast-forwards the ad to just before its end so it's over in a flash
 - **Banner / overlay ads** - Closes banner ads shown over the video
-- **Sidebar / feed ads** - Removes display, companion, and feed ad units
 - **Anti-adblock popup** - Dismisses YouTube's adblock-detection popup (and only that — normal menus and dialogs are never touched)
+- **Hands off everything else** - Only touches ads on the video; never feed, sidebar, or thumbnail ads (removing those shifts the page and breaks YouTube's menus)
 - **Stays out of your way** - Never forces playback, so you can pause, scrub, change quality, and let a video end normally without toggling the extension off
 - **Toggle on/off** - Popup UI with toggle switch or keyboard shortcut (Ctrl+Shift+Y / Cmd+Shift+Y)
 - **Stats tracking** - Counts ads skipped and time saved
@@ -73,9 +73,10 @@ document (coalesced to once per frame) plus a 1s fallback interval:
 2. **If no ad is playing**, it does not touch the `<video>` at all. This is the
    key to a good experience: the extension never calls `play()`, so pausing,
    scrubbing, and a video ending all work normally.
-3. **Off-player cleanup** (banner ads, feed ad units, the adblock popup) runs on
-   a throttle, and the adblock dismissal only fires when YouTube's enforcement
-   message is actually present, so normal menus and dialogs are never broken.
+3. **On-video cleanup** (banner ads over the video, the adblock popup) runs on a
+   throttle, and the adblock dismissal only fires when YouTube's enforcement
+   message is actually present. It never touches feed/sidebar/thumbnail ads, so
+   normal menus and dialogs are never broken.
 
 The extension can be toggled on/off via the popup or keyboard shortcut. State is
 persisted in `chrome.storage.local`, and every tab reacts via `storage.onChanged`.

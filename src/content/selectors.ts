@@ -25,20 +25,6 @@ export const SELECTORS = {
     'button[aria-label="Close ad"]',
   ],
 
-  // Off-player ad units in the feed / sidebar / masthead. Safe to remove —
-  // they are not part of the player and never affect playback.
-  sidebarAds: [
-    "ytd-ad-slot-renderer",
-    "ytd-display-ad-renderer",
-    "ytd-action-companion-ad-renderer",
-    "ytd-in-feed-ad-layout-renderer",
-    "ytd-banner-promo-renderer",
-    "ytd-statement-banner-renderer",
-    "#masthead-ad",
-    "#player-ads",
-    "ad-slot-renderer",
-  ],
-
   // Adblock-detection popup. We only touch these primitives when the
   // enforcement message is actually present, so normal YouTube menus and
   // dialogs (which share the same backdrop/popup elements) are never broken.
